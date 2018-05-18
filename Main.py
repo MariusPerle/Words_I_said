@@ -7,14 +7,17 @@ from threading import Thread
 import speech_recognition as sr
 
 
-def mainfunction(source, language):
+def mainfunction(source, args):
     audio = r.listen(source, phrase_time_limit=2)
     try:
-        user = r.recognize_google(audio, language=language)
+        user = r.recognize_google(audio, language=args['language'])
     except sr.UnknownValueError:
         user = ''
     thread = Thread(target=using_it, args=(user,))
     thread.start()
+    if args['end_statement']:
+        if args['end_statement'] in user:
+            sys.exit('shutdown')
 
 
 def using_it(text):
@@ -33,7 +36,11 @@ def using_it(text):
 def read_config():
     config = configparser.ConfigParser()
     config.read('config.ini')
-    return config['DEFAULT']['language']
+    end =config['DEFAULT']['end_statement']
+    if end is '':
+        end = None
+    return {'language':config['DEFAULT']['language'],
+            'end_statement':end,}
 
 
 
@@ -42,8 +49,5 @@ if __name__ == "__main__":
     list_all_words = {}
     r = sr.Recognizer()
     with sr.Microphone() as source:
-        try:
-            while 1:
-                mainfunction(source, read_config())
-        except SystemExit:
-            print('aaaaaaaaaaaaaah')
+        while 1:
+            mainfunction(source, read_config())
