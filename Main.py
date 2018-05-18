@@ -1,34 +1,21 @@
+import atexit
+import configparser
+import os
+import sys
 from threading import Thread
 
-import pyaudio,os
 import speech_recognition as sr
-import configparser
 
-
-def excel():
-        os.system("start excel.exe")
-
-def internet():
-        os.system("start chrome.exe")
-
-def media():
-        os.system("start wmplayer.exe")
 
 def mainfunction(source, language):
-    audio = r.listen(source)
+    audio = r.listen(source, phrase_time_limit=2)
     try:
         user = r.recognize_google(audio, language=language)
     except sr.UnknownValueError:
         user = ''
-    thread = Thread(target=using_it, args=(user, ))
+    thread = Thread(target=using_it, args=(user,))
     thread.start()
-    thread.join()
-    if user == "Excel":
-        excel()
-    elif user == "Internet":
-        internet()
-    elif user == "music":
-        media()
+
 
 def using_it(text):
     print(text)
@@ -42,14 +29,21 @@ def using_it(text):
             list_all_words[entry] = 1
     print(list_all_words)
 
+
 def read_config():
     config = configparser.ConfigParser()
     config.read('config.ini')
     return config['DEFAULT']['language']
 
+
+
+
 if __name__ == "__main__":
     list_all_words = {}
     r = sr.Recognizer()
     with sr.Microphone() as source:
-        while 1:
-            mainfunction(source, read_config())
+        try:
+            while 1:
+                mainfunction(source, read_config())
+        except SystemExit:
+            print('aaaaaaaaaaaaaah')
