@@ -15,7 +15,7 @@ def voice_2_text(source, args):
     thread = Thread(target=using_it, args=(user,))
     thread.start()
     if args['end_statement']:
-        save_text(save_text(user, args))
+        save_text(user, args)
 
 
 def save_text(user, config):
