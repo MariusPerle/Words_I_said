@@ -2,6 +2,7 @@ from threading import Thread
 
 import pyaudio,os
 import speech_recognition as sr
+import configparser
 
 
 def excel():
@@ -13,10 +14,10 @@ def internet():
 def media():
         os.system("start wmplayer.exe")
 
-def mainfunction(source):
+def mainfunction(source, language):
     audio = r.listen(source)
     try:
-        user = r.recognize_google(audio, language='de-DE')
+        user = r.recognize_google(audio, language=language)
     except sr.UnknownValueError:
         user = ''
     thread = Thread(target=using_it, args=(user, ))
@@ -41,9 +42,14 @@ def using_it(text):
             list_all_words[entry] = 1
     print(list_all_words)
 
+def read_config():
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    return config['DEFAULT']['language']
+
 if __name__ == "__main__":
     list_all_words = {}
     r = sr.Recognizer()
     with sr.Microphone() as source:
         while 1:
-            mainfunction(source)
+            mainfunction(source, read_config())
