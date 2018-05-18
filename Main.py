@@ -5,7 +5,7 @@ from threading import Thread
 import speech_recognition as sr
 
 
-def mainfunction(source, args):
+def voice_2_text(source, args):
     r.adjust_for_ambient_noise(source)
     audio = r.listen(source, phrase_time_limit=2)
     try:
@@ -15,16 +15,20 @@ def mainfunction(source, args):
     thread = Thread(target=using_it, args=(user,))
     thread.start()
     if args['end_statement']:
-        if args['end_statement'] in user:
-            with open('text.txt', 'w', encoding='utf-8') as file:
-                for line in our_text:
-                    if line in ['', ' ']:
-                        continue
-                    if line in args['end_statement']:
-                        continue
-                    file.write(line)
-                    file.write('\n')
-            sys.exit('shutdown')
+        save_text(save_text(user, args))
+
+
+def save_text(user, config):
+    if config['end_statement'] in user:
+        with open('text.txt', 'w', encoding='utf-8') as file:
+            for line in our_text:
+                if line in ['', ' ']:
+                    continue
+                if line in config['end_statement']:
+                    continue
+                file.write(line)
+                file.write('\n')
+        sys.exit('file saved')
 
 
 def using_it(text):
@@ -57,4 +61,4 @@ if __name__ == "__main__":
     r = sr.Recognizer()
     with sr.Microphone() as source:
         while 1:
-            mainfunction(source, read_config())
+            voice_2_text(source, read_config())
