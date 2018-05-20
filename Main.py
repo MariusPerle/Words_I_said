@@ -1,14 +1,15 @@
 import configparser
 import operator
 import sys
+import tkinter as tk
 from threading import Thread
 
 import speech_recognition as sr
-import tkinter as tk
+
 
 class GUI:
     def __init__(self, master, config):
-        self.label=tk.Label(master)
+        self.label = tk.Label(master)
         self.label.grid(row=0, column=0)
         self.label.configure(text='nothing')
         self.update_label()
@@ -21,8 +22,9 @@ class GUI:
                 text = count_one_word(config_args['count_this_word'])
             else:
                 text = most_frequent_words(config_args)
-            self.label.configure(text = text)
-            self.label.after(1000, self.update_label) # call this method again in 1,000 milliseconds
+            self.label.configure(text=text)
+            self.label.after(1000, self.update_label)  # call this method again in 1,000 milliseconds
+
 
 def voice_2_text(source, args):
     r.adjust_for_ambient_noise(source)
@@ -31,7 +33,7 @@ def voice_2_text(source, args):
         user = r.recognize_google(audio, language=args['language'])
     except sr.UnknownValueError:
         user = ''
-    thread = Thread(target=using_it, args=(user,))
+    thread = Thread(target=text_analysis, args=(user,))
     thread.start()
     if args['end_statement']:
         save_text(user, args)
@@ -50,9 +52,9 @@ def save_text(user, config):
         sys.exit('file saved')
 
 
-def using_it(text):
-    print(text)
+def text_analysis(text):
     our_text.append(text)
+    text = text.lower()
     words = text.split(' ')
     for entry in words:
         if entry in ['', ' ']:
@@ -61,7 +63,6 @@ def using_it(text):
             list_all_words[entry] += 1
         else:
             list_all_words[entry] = 1
-    print(list_all_words)
 
 
 def read_config():
@@ -76,10 +77,12 @@ def read_config():
             'amount_shown': config['GUI']['amount_shown'],
             'count_this_word': config['GUI']['count_this_word']}
 
+
 def run_gui(config):
     root = tk.Tk()
     GUI(root, config)
     root.mainloop()
+
 
 def most_frequent_words(config):
     sorted_map = sorted(list_all_words.items(), key=operator.itemgetter(1), reverse=True)
@@ -94,6 +97,7 @@ def most_frequent_words(config):
             continue
     return text
 
+
 def count_one_word(word):
     if word in list_all_words.keys():
         return word + '  ' + str(list_all_words[word])
@@ -101,13 +105,12 @@ def count_one_word(word):
         return word
 
 
-
 if __name__ == "__main__":
     our_text = []
     list_all_words = {}
     r = sr.Recognizer()
     config_args = read_config()
-    thread = Thread(target=run_gui, args=(config_args, ))
+    thread = Thread(target=run_gui, args=(config_args,))
     thread.start()
     with sr.Microphone() as source:
         while 1:
