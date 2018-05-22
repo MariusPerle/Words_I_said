@@ -16,8 +16,6 @@ class GUI:
 
     def update_label(self):
         if list_all_words is not {}:
-            print(config_args['amount_shown'])
-            print(config_args['amount_shown'] == '')
             if config_args['amount_shown'] is '':
                 text = count_one_word(config_args['count_this_word'])
             else:
