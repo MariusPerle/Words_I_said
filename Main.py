@@ -24,17 +24,11 @@ class GUI:
             self.label.after(1000, self.update_label)  # call this method again in 1,000 milliseconds
 
 
-def voice_2_text(source, args):
+def voice_2_text(source, config):
     r.adjust_for_ambient_noise(source)
     audio = r.listen(source, phrase_time_limit=1)
-    try:
-        user = r.recognize_google(audio, language=args['language'])
-    except sr.UnknownValueError:
-        user = ''
-    thread = Thread(target=text_analysis, args=(user,))
+    thread = Thread(target=text_analysis, args=(audio, config))
     thread.start()
-    if args['end_statement']:
-        save_text(user, args)
 
 
 def save_text(user, config):
@@ -50,7 +44,12 @@ def save_text(user, config):
         sys.exit('file saved')
 
 
-def text_analysis(text):
+def text_analysis(audio, config):
+    try:
+        text = r.recognize_google(audio, language=config['language'])
+    except sr.UnknownValueError:
+        return
+    print(text)
     our_text.append(text)
     text = text.lower()
     words = text.split(' ')
@@ -61,6 +60,8 @@ def text_analysis(text):
             list_all_words[entry] += 1
         else:
             list_all_words[entry] = 1
+    if config['end_statement']:
+        save_text(text, config)
 
 
 def read_config():
@@ -111,5 +112,5 @@ if __name__ == "__main__":
     thread = Thread(target=run_gui, args=(config_args,))
     thread.start()
     with sr.Microphone() as source:
-        while 1:
+        while True:
             voice_2_text(source, config_args)
